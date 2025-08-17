@@ -1,0 +1,12 @@
+//
+//  Staging.xcconfig
+//  CurrencyConverter
+//
+//  Created by Nyan Lin Tun on 17/8/25.
+//
+
+// Configuration settings file format documentation can be found at:
+// https://developer.apple.com/documentation/xcode/adding-a-build-configuration-file-to-your-project
+
+APP_BUNDLE_DISPLAY_NAME = Staging
+APP_BUNDLE_IDENTIFIER = me.nyanlintun.CurrencyConverter.staging
