@@ -2,7 +2,7 @@
 //  Currency.swift
 //  CurrencyConverter
 //
-//  Created by Zay Yar Phyo on 14/08/2025.
+//  Created by Nyan on 14/08/2025.
 //
 
 import Foundation
