@@ -43,7 +43,7 @@ struct ContentView: View {
                         HStack {
                             Button(action: {
                                 showFromSheet.toggle()
-                            }, label: {
+                            }) {
                                 HStack {
                                     if let countryCode = fromCurrency?.countryCode {
                                         Text(countryCode)
@@ -62,7 +62,7 @@ struct ContentView: View {
 
                                     Image(systemName: "chevron.down")
                                 }
-                            })
+                            }
 
                             Divider()
 
@@ -94,7 +94,7 @@ struct ContentView: View {
                         HStack {
                             Button(action: {
                                 showToSheet.toggle()
-                            }, label: {
+                            }) {
                                 HStack {
                                     if let countryCode = toCurrency?.countryCode {
                                         Text(countryCode)
@@ -113,7 +113,7 @@ struct ContentView: View {
 
                                     Image(systemName: "chevron.down")
                                 }
-                            })
+                            }
 
                             Divider()
 
@@ -146,25 +146,25 @@ struct ContentView: View {
                 }
             }
             .task {
-                getData()
+                getCurrencyData()
             }
         }
     }
-    private func getData() {
+
+    private func getCurrencyData() {
         let decoder = JSONDecoder()
         decoder.keyDecodingStrategy = .convertFromSnakeCase
-        AF.request("https://v6.exchangerate-api.com/v6/57294560b881599db71a71e1/latest/USD")
+        AF.request("https://v6.exchangerate-api.com/v6/1c2f03558dc36eaaf3bc7526/latest/USD")
             .responseDecodable(of: CurrencyResponse.self, decoder: decoder) { response in
                 switch response.result {
                 case .success(let currencies):
-                    print("Successfully fetched \(currencies.conversionRates.count) currencies")
-                    print(currencies.conversionRates)
+                    print("Successfully fetch currencies: \(currencies.conversionRates.count)")
                 case .failure(let error):
                     print("Error: \(error)")
-                    // Handle the error
                 }
             }
     }
+
     private func swapCurrencies() {
         let temp = fromCurrency
         fromCurrency = toCurrency
@@ -179,10 +179,10 @@ struct ContentView: View {
     }
 }
 
-struct CurrencyResponse: Codable {
-    let conversionRates: [String: Double]
-}
-
 #Preview {
     ContentView()
+}
+
+struct CurrencyResponse: Codable {
+    let conversionRates: [String: Double]
 }

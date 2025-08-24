@@ -7,14 +7,6 @@
 
 import Foundation
 
-func baseUrl() -> String {
-    return AppConfig.baseUrl
-}
-
-func apiKey() -> String {
-    return AppConfig.apiKey
-}
-
 enum Plist {
     case baseUrl
     case apiKey
@@ -22,7 +14,6 @@ enum Plist {
         switch self {
         case .baseUrl:
             return "Base URL"
-            
         case .apiKey:
             return "API Key"
         }
