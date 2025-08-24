@@ -9,26 +9,16 @@ import Alamofire
 import SwiftUI
 
 struct ContentView: View {
-    @State private var fromCurrency: Currency?
-    @State private var toCurrency: Currency?
-    @State private var amount: String = ""
-    @State private var convertedAmount: String = ""
-
+    @StateObject var viewModel: ViewModel = ViewModel()
+    // MARK: - Form related
     @State private var showFromSheet = false
     @State private var showToSheet = false
-
+    // MARK: - View body
     var body: some View {
         NavigationView {
             ScrollView {
                 VStack {
-                    Image(systemName: "chart.line.uptrend.xyaxis")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 60, height: 60)
-                        .foregroundStyle(.blue)
-
-                    Text("Convert currencies in real-time")
-                        .foregroundStyle(.secondary)
+                    header
 
                     Spacer().frame(height: 24)
 
@@ -43,30 +33,30 @@ struct ContentView: View {
                         HStack {
                             Button(action: {
                                 showFromSheet.toggle()
-                            }) {
+                            }, label: {
                                 HStack {
-                                    if let countryCode = fromCurrency?.countryCode {
-                                        Text(countryCode)
+                                    if let countryCode = viewModel.fromCurrency?.countryCode {
+                                        Text(countryCode) // Set data only one time
                                             .font(.title)
                                     } else {
                                         Image(systemName: "globe")
                                     }
 
                                     VStack(alignment: .leading, spacing: 0) {
-                                        Text(fromCurrency?.code ?? "Select")
+                                        Text(viewModel.fromCurrency?.code ?? "Select")
 
-                                        if let symbol = fromCurrency?.symbol {
+                                        if let symbol = viewModel.fromCurrency?.symbol {
                                             Text(symbol)
                                         }
                                     }
 
                                     Image(systemName: "chevron.down")
                                 }
-                            }
+                            })
 
                             Divider()
 
-                            TextField("Enter Amount", text: $amount)
+                            TextField("Enter Amount", text: $viewModel.amount) // Observe
                                 .keyboardType(.decimalPad)
                                 .font(.title3)
                         }
@@ -76,7 +66,7 @@ struct ContentView: View {
                                 .fill(Color(.systemGray6))
                         )
 
-                        Button(action: swapCurrencies) {
+                        Button(action: viewModel.swapCurrencies) {
                             Image(systemName: "arrow.up.arrow.down.circle.fill")
                                 .resizable()
                                 .scaledToFit()
@@ -94,9 +84,9 @@ struct ContentView: View {
                         HStack {
                             Button(action: {
                                 showToSheet.toggle()
-                            }) {
+                            }, label: {
                                 HStack {
-                                    if let countryCode = toCurrency?.countryCode {
+                                    if let countryCode = viewModel.toCurrency?.countryCode {
                                         Text(countryCode)
                                             .font(.title)
                                     } else {
@@ -104,20 +94,20 @@ struct ContentView: View {
                                     }
 
                                     VStack(alignment: .leading, spacing: 0) {
-                                        Text(toCurrency?.code ?? "Select")
+                                        Text(viewModel.toCurrency?.code ?? "Select")
 
-                                        if let symbol = toCurrency?.symbol {
+                                        if let symbol = viewModel.toCurrency?.symbol {
                                             Text(symbol)
                                         }
                                     }
 
                                     Image(systemName: "chevron.down")
                                 }
-                            }
+                            })
 
                             Divider()
 
-                            TextField("Converted Amount", text: $convertedAmount)
+                            TextField("Converted Amount", text: $viewModel.convertedAmount)
                                 .keyboardType(.decimalPad)
                                 .font(.title3)
                                 .disabled(true)
@@ -134,55 +124,35 @@ struct ContentView: View {
                 .toolbar {
                     ToolbarItem {
                         Button("Clear") {
-                            clearData()
+                            viewModel.clearData()
                         }
                     }
                 }
                 .sheet(isPresented: $showFromSheet) {
-                    CurrencyPickerView(selectedCurrency: $fromCurrency)
+                    CurrencyPickerView(selectedCurrency: $viewModel.fromCurrency)
                 }
                 .sheet(isPresented: $showToSheet) {
-                    CurrencyPickerView(selectedCurrency: $toCurrency)
+                    CurrencyPickerView(selectedCurrency: $viewModel.toCurrency)
                 }
-            }
-            .task {
-                getCurrencyData()
             }
         }
     }
 
-    private func getCurrencyData() {
-        let decoder = JSONDecoder()
-        decoder.keyDecodingStrategy = .convertFromSnakeCase
-        AF.request("https://v6.exchangerate-api.com/v6/1c2f03558dc36eaaf3bc7526/latest/USD")
-            .responseDecodable(of: CurrencyResponse.self, decoder: decoder) { response in
-                switch response.result {
-                case .success(let currencies):
-                    print("Successfully fetch currencies: \(currencies.conversionRates.count)")
-                case .failure(let error):
-                    print("Error: \(error)")
-                }
-            }
+    private var header: some View {
+        VStack {
+            Image(systemName: "chart.line.uptrend.xyaxis")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 60, height: 60)
+                .foregroundStyle(.blue)
+            Text("Convert currencies in real-time")
+                .foregroundStyle(.secondary)
+        }
     }
 
-    private func swapCurrencies() {
-        let temp = fromCurrency
-        fromCurrency = toCurrency
-        toCurrency = temp
-    }
-
-    private func clearData() {
-        fromCurrency = nil
-        toCurrency = nil
-        amount = ""
-        convertedAmount = ""
-    }
 }
 
 #Preview {
     ContentView()
 }
 
-struct CurrencyResponse: Codable {
-    let conversionRates: [String: Double]
-}
