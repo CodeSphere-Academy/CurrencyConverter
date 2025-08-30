@@ -11,7 +11,7 @@ import Foundation
 protocol CurrencyUseCaseDelegate: AnyObject {
     func convertCurrency(amount: Double, from: String, to: String) async -> Double
     func fetchLatestRates(baseCurrency: String) async throws -> [String: Double]
-    func getAvailableCurrencies() -> [Currency]
+    func getAvailableCurrencies() async throws -> [Currency]
     func swapCurrencies(from: Currency?, to: Currency?) -> (from: Currency?, to: Currency?)
 }
 
@@ -22,17 +22,21 @@ class CurrencyUseCase: CurrencyUseCaseDelegate {
     init(repository: CurrencyRepositoryDelegate = CurrencyRepository()) {
         self.repository = repository
     }
+    
     func convertCurrency(amount: Double, from: String, to: String) async -> Double {
         return 0.0
     }
-    func fetchLatestRates(baseCurrency: String) async throws -> [String : Double] {
+    
+    func fetchLatestRates(baseCurrency: String) async throws -> [String: Double] {
         let response = try await repository.fetchLatestRates()
         cache = response.conversionRates
         return response.conversionRates
     }
-    func getAvailableCurrencies() -> [Currency] {
-        return self.repository.getAvailableCurrencies()
+    
+    func getAvailableCurrencies() async throws -> [Currency] {
+        return try await repository.getAvailableCurrencies()
     }
+    
     func swapCurrencies(from: Currency?, to: Currency?) -> (from: Currency?, to: Currency?) {
         (from: to, to: from)
     }

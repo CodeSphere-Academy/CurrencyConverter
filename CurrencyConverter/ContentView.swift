@@ -9,7 +9,7 @@ import Alamofire
 import SwiftUI
 
 struct ContentView: View {
-    @StateObject var viewModel: ViewModel = ViewModel()
+    @StateObject var viewModel = ViewModel()
     // MARK: - Form related
     @State private var showFromSheet = false
     @State private var showToSheet = false
@@ -19,7 +19,6 @@ struct ContentView: View {
             ScrollView {
                 VStack {
                     header
-
                     Spacer().frame(height: 24)
 
                     VStack(alignment: .leading, spacing: 8) {
@@ -36,7 +35,7 @@ struct ContentView: View {
                             }, label: {
                                 HStack {
                                     if let countryCode = viewModel.fromCurrency?.countryCode {
-                                        Text(countryCode) // Set data only one time
+                                        Text(countryCode)
                                             .font(.title)
                                     } else {
                                         Image(systemName: "globe")
@@ -56,9 +55,10 @@ struct ContentView: View {
 
                             Divider()
 
-                            TextField("Enter Amount", text: $viewModel.amount) // Observe
+                            TextField("Enter Amount", text: $viewModel.amount)
                                 .keyboardType(.decimalPad)
                                 .font(.title3)
+                                .submitLabel(.done)
                         }
                         .padding()
                         .background(
@@ -66,12 +66,14 @@ struct ContentView: View {
                                 .fill(Color(.systemGray6))
                         )
 
-                        Button(action: viewModel.swapCurrencies) {
+                        Button(action: {
+                            viewModel.swapCurrencies()
+                        }, label: {
                             Image(systemName: "arrow.up.arrow.down.circle.fill")
                                 .resizable()
                                 .scaledToFit()
                                 .frame(width: 40, height: 40)
-                        }
+                        })
                         .frame(maxWidth: .infinity)
                         .padding()
 
@@ -118,6 +120,16 @@ struct ContentView: View {
                                 .fill(Color(.systemGray6))
                         )
                     }
+
+                    Spacer().frame(height: 24)
+
+                    Button {
+                        viewModel.getConversionRate()
+                    } label: {
+                        Text("Convert")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.borderedProminent)
                 }
                 .padding()
                 .navigationTitle("Currency Converter")
@@ -129,11 +141,21 @@ struct ContentView: View {
                     }
                 }
                 .sheet(isPresented: $showFromSheet) {
-                    CurrencyPickerView(selectedCurrency: $viewModel.fromCurrency)
+                    CurrencyPickerView(
+                        selectedCurrency: $viewModel.fromCurrency,
+                        supportedCurrencies: viewModel.supportedCurrencies
+                    )
                 }
                 .sheet(isPresented: $showToSheet) {
-                    CurrencyPickerView(selectedCurrency: $viewModel.toCurrency)
+                    CurrencyPickerView(
+                        selectedCurrency: $viewModel.toCurrency,
+                        supportedCurrencies: viewModel.supportedCurrencies
+                    )
                 }
+            }
+            .task {
+                await viewModel.getSupportedCurrencies()
+                await viewModel.getLatestRates()
             }
         }
     }
@@ -155,4 +177,3 @@ struct ContentView: View {
 #Preview {
     ContentView()
 }
-

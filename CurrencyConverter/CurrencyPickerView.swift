@@ -11,6 +11,7 @@ struct CurrencyPickerView: View {
     @Environment(\.dismiss) var dismiss
     @Binding var selectedCurrency: Currency?
     @State private var searchText = ""
+    var supportedCurrencies: [Currency]
 
     var body: some View {
         NavigationView {
@@ -50,16 +51,17 @@ struct CurrencyPickerView: View {
     }
 
     func getFilteredCurrency() -> [Currency] {
-        if searchText.isEmpty {
-            return dummyCurrencies
-        }
-        return dummyCurrencies.filter {
-            $0.name.lowercased().contains(searchText.lowercased()) ||
-            $0.code.lowercased().contains(searchText.lowercased())
-        }
+//        if searchText.isEmpty {
+//            return dummyCurrencies
+//        }
+//        return dummyCurrencies.filter {
+//            $0.name.lowercased().contains(searchText.lowercased()) ||
+//            $0.code.lowercased().contains(searchText.lowercased())
+//        }
+        return supportedCurrencies
     }
 }
 
 #Preview {
-    CurrencyPickerView(selectedCurrency: .constant(nil))
+    CurrencyPickerView(selectedCurrency: .constant(nil), supportedCurrencies: dummyCurrencies)
 }

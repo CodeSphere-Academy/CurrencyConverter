@@ -10,3 +10,7 @@ import Foundation
 struct CurrencyResponse: Codable {
     let conversionRates: [String: Double]
 }
+
+struct CurrencyCodeResponse: Decodable {
+    let supportedCodes: [[String]]
+}
